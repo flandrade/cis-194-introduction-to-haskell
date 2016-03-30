@@ -28,11 +28,6 @@ getRem n = n `rem` 10
 getDiv :: Integer -> Integer
 getDiv n = n `div` 10
 
--- Reverse elements of a list
-getReverse :: [Integer] -> [Integer]
-getReverse [] = []
-getReverse (x:y) = reverse y ++ [x]
-
 -- Get a reverse list of digits
 toDigitsRev :: Integer -> [Integer]
 toDigitsRev n
@@ -42,10 +37,7 @@ toDigitsRev n
 
 -- Get list of digits
 toDigits :: Integer -> [Integer]
-toDigits n
-  | n <= 0    = []
-  | n < 10    = [n]
-  | otherwise = getReverse(toDigitsRev n)
+toDigits = reverse . toDigitsRev
 
 ----------------------------------------------------------------------
 -- Exercise 2
@@ -66,10 +58,10 @@ lengthList (_:x) = 1 + lengthList x
 -- double every two numbers of a list
 doubleEveryOther :: [Integer] -> [Integer]
 doubleEveryOther []       = []
-doubleEveryOther (x:[])   = [x]
+doubleEveryOther [x]   = [x]
 doubleEveryOther (x:y:zs)
-  | lengthList (x:y:zs) `rem` 2 == 0 =  2 * x : y: doubleEveryOther zs
-  | otherwise                        =  x : 2 * y : doubleEveryOther zs
+  | even (lengthList (x : y : zs)) =  2 * x : y: doubleEveryOther zs
+  | otherwise                      =  x : 2 * y : doubleEveryOther zs
 
 ----------------------------------------------------------------------
 -- Exercise 3
@@ -80,16 +72,12 @@ doubleEveryOther (x:y:zs)
 -- >>> sumDigits [16,7,12,5]
 -- 22
 
--- Sum of two digits
-sumTwoDigits :: [Integer] -> Integer
-sumTwoDigits [] = 0
-sumTwoDigits (x:y) = x + sumTwoDigits y
 
 -- Sum of all digits
 sumDigits :: [Integer] -> Integer
 sumDigits []      = 0
-sumDigits (x:[])  = x
-sumDigits (x:y:z) = sumTwoDigits (toDigits x) + sumTwoDigits (toDigits y) + sumDigits z
+sumDigits [x]  = x
+sumDigits (x:y:z) = sum (toDigits x) + sum (toDigits y) + sumDigits z
 
 ----------------------------------------------------------------------
 -- Exercise 4
