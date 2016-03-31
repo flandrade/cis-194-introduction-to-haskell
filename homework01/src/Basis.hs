@@ -57,11 +57,11 @@ lengthList (_:x) = 1 + lengthList x
 
 -- double every two numbers of a list
 doubleEveryOther :: [Integer] -> [Integer]
-doubleEveryOther []       = []
-doubleEveryOther [x]   = [x]
+doubleEveryOther []              = []
+doubleEveryOther [x]             = [x]
 doubleEveryOther (x:y:zs)
-  | even (lengthList (x : y : zs)) =  2 * x : y: doubleEveryOther zs
-  | otherwise                      =  x : 2 * y : doubleEveryOther zs
+  | even . lengthList $ (x:y:zs) =  2 * x : y: doubleEveryOther zs
+  | otherwise                    =  x : 2 * y : doubleEveryOther zs
 
 ----------------------------------------------------------------------
 -- Exercise 3
@@ -76,7 +76,7 @@ doubleEveryOther (x:y:zs)
 -- Sum of all digits
 sumDigits :: [Integer] -> Integer
 sumDigits []      = 0
-sumDigits [x]  = x
+sumDigits [x]     = x
 sumDigits (x:y:z) = sum (toDigits x) + sum (toDigits y) + sumDigits z
 
 ----------------------------------------------------------------------
@@ -93,8 +93,8 @@ sumDigits (x:y:z) = sum (toDigits x) + sum (toDigits y) + sumDigits z
 -- Validate a credit card number
 validate :: Integer -> Bool
 validate n
-  | getRem (sumDigits (doubleEveryOther (toDigits n))) == 0 = True
-  | otherwise                                               = False
+  | (getRem . sumDigits . doubleEveryOther . toDigits $ n) == 0 = True
+  | otherwise                                                   = False
 
 ----------------------------------------------------------------------
 -- Exercise 5
