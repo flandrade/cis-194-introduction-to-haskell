@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wall #-}
 
 ----------------------------------------------------------------------
 -- |
@@ -64,7 +63,8 @@ insert lmInsert@(LogMessage _ timeStampInsert _) mt@(Node left lm@(LogMessage _ 
   | timeStampInsert == timeStamp = mt
   | timeStampInsert < timeStamp  = Node (insert lmInsert left) lm right
   | timeStampInsert > timeStamp  = Node left lm (insert lmInsert right)
-
+insert lm@LogMessage{} (Node _ (Unknown _) _) = Node Leaf lm Leaf
+insert lm@LogMessage{} (Node _ LogMessage{} _) = Node Leaf lm Leaf
 
 ----------------------------------------------------------------------
 -- Exercise 3
@@ -117,9 +117,11 @@ isRelevant _ = False
 getMessages :: [LogMessage] -> [String]
 getMessages [] = []
 getMessages [Unknown _] = []
+getMessages (Unknown _: (_ : _)) = []
 getMessages (lm@(LogMessage _ _ message) : xs)
   | isError lm && isRelevant lm = message : getMessages xs
   | otherwise                   = getMessages xs
+
 
 -- Messages from ordered list
 whatWentWrong :: [LogMessage] -> [String]

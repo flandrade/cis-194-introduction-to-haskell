@@ -92,9 +92,7 @@ sumDigits (x:y:z) = sum (toDigits x) + sum (toDigits y) + sumDigits z
 
 -- Validate a credit card number
 validate :: Integer -> Bool
-validate n
-  | (getRem . sumDigits . doubleEveryOther . toDigits $ n) == 0 = True
-  | otherwise                                                   = False
+validate n = (getRem . sumDigits . doubleEveryOther . toDigits $ n ) == 0 
 
 ----------------------------------------------------------------------
 -- Exercise 5
