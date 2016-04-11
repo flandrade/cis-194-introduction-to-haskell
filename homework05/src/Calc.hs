@@ -21,13 +21,13 @@ import qualified Data.Map as M
 
 -- |
 --
--- >>> eval (Mul (Add (Lit 2) (Lit 3)) (Lit 4)) == 20
+-- >>> eval (ExprT.Mul (ExprT.Add (ExprT.Lit 2) (ExprT.Lit 3)) (ExprT.Lit 4)) == 20
 -- True
 
 eval :: ExprT -> Integer
-eval (Lit n) = n
-eval (ExprT.Add firsTerm secondTerm) = (eval firsTerm) + (eval secondTerm)
-eval (ExprT.Mul firsTerm secondTerm) = (eval firsTerm) * (eval secondTerm)
+eval (ExprT.Lit n) = n
+eval (ExprT.Add firsTerm secondTerm) = eval firsTerm + eval secondTerm
+eval (ExprT.Mul firsTerm secondTerm) = eval firsTerm * eval secondTerm
 
 
 ----------------------------------------------------------------------
@@ -54,9 +54,9 @@ class Expr a where
   lit :: Integer -> a
 
 instance Expr ExprT where
-  add a b = (ExprT.Add a b)
-  mul a b = (ExprT.Mul a b)
-  lit a   = (ExprT.Lit a)
+  add = ExprT.Add
+  mul = ExprT.Mul
+  lit = ExprT.Lit
 
 reify :: ExprT -> ExprT
 reify = id
@@ -75,17 +75,17 @@ instance Expr Integer where
   mul a b = a * b
 
 instance Expr Bool where
-  lit a = (if a <= 0 then False else True)
+  lit a = a > 0
   add a b = a || b
   mul a b = a && b
 
 instance Expr MinMax where
-  lit a = MinMax a
+  lit = MinMax
   add (MinMax a) (MinMax b) = MinMax (max a b)
   mul (MinMax a) (MinMax b) = MinMax (min a b)
 
 instance Expr Mod7 where
-  lit a = Mod7 a
+  lit = Mod7
   add (Mod7 a) (Mod7 b) = Mod7 (mod (a + b) 7)
   mul (Mod7 a) (Mod7 b) = Mod7 (mod (a - b) 7)
 
@@ -97,26 +97,15 @@ testExp = parseExp lit add mul "(3 * -4) + 5"
 -- Exercise 5 (do this OR exercise 6)
 ----------------------------------------------------------------------
 
---compile :: String -> Maybe Program
---compile = undefined
+instance Expr Program where
+   add a b = a ++ b ++ [StackVM.Add]
+   mul a b = a ++ b ++ [StackVM.Mul]
+   lit a   = [PushI a]
+
+compile :: String -> Maybe Program
+compile = parseExp lit add mul
 
 
 ----------------------------------------------------------------------
 -- Exercise 6 (do this OR exercise 5)
 ----------------------------------------------------------------------
-
-withVars :: [(String, Integer)]
-         -> (M.Map String Integer -> Maybe Integer)
-         -> Maybe Integer
-withVars vs exp = exp $ M.fromList vs
-
--- |
---
--- >>> :t add (lit 3) (var "x")
--- add (lit 3) (var "x") :: (Expr a, HasVars a) => a
--- >>> withVars [("x", 6)] $ add (lit 3) (var "x")
--- Just 9
--- >>> withVars [("x", 6)] $ add (lit 3) (var "y")
--- Nothing
--- >>> withVars [("x", 6), ("y", 3)] $ mul (var "x") (add (var "y") (var "x"))
--- Just 54
