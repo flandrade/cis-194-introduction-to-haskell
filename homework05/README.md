@@ -2,7 +2,7 @@
 
 ## [CIS 194 Spring 2013][cis194]
 
-- [Homework 8][hw5]
+- [Homework 5][hw5]
 
 
 [cis194]: http://www.seas.upenn.edu/~cis194/spring13/
