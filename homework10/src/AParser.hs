@@ -58,11 +58,13 @@ posInt = Parser f
 
 instance Functor Parser where
   fmap :: (a -> b) -> Parser a -> Parser b
-  fmap = undefined
+  fmap f parser = Parser p
+    where p st = fmap (first f) (runParser parser st)
 
 
+-- Apply f to the first element and keep the second unchanged
 first :: (a -> b) -> (a, c) -> (b, c)
-first = undefined
+first f (a, c) = (f a, c)
 
 
 ----------------------------------------------------------------------
@@ -71,10 +73,14 @@ first = undefined
 
 instance Applicative Parser where
   pure :: a -> Parser a
-  pure = undefined
+  pure x = Parser p
+    where p st = Just (x, st)
 
   (<*>) :: Parser (a -> b) -> Parser a -> Parser b
-  (<*>) = undefined
+  (<*>) p1 p2 = Parser p
+    where p st = case runParser p1 st of
+                   Nothing -> Nothing
+                   Just (f, st') -> fmap (first f) (runParser p2 st')
 
 
 ----------------------------------------------------------------------
@@ -89,8 +95,8 @@ instance Applicative Parser where
 -- Nothing
 
 abParser :: Parser (Char, Char)
-abParser = undefined
-
+abParser = f <$> char 'a' <*> char 'b'
+  where f a b = (a,b)
 
 -- |
 --
@@ -100,7 +106,8 @@ abParser = undefined
 -- Nothing
 
 abParser_ :: Parser ()
-abParser_ = undefined
+abParser_ = f <$> char 'a' <*> char 'b'
+  where f _ _ = ()
 
 
 -- |
@@ -109,7 +116,8 @@ abParser_ = undefined
 -- Just ([12,34],"")
 
 intPair :: Parser [Integer]
-intPair = undefined
+intPair = f <$> posInt <*> char ' ' <*> posInt
+  where f a _ b = [a,b]
 
 
 ----------------------------------------------------------------------
