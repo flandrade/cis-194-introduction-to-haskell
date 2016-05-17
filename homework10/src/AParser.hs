@@ -126,11 +126,13 @@ intPair = f <$> posInt <*> char ' ' <*> posInt
 
 instance Alternative Parser where
   empty :: Parser a
-  empty = undefined
+  empty = Parser p
+    where p _ = Nothing
 
   (<|>) :: Parser a -> Parser a -> Parser a
-  (<|>) = undefined
-
+  (<|>) p1 p2 = Parser p
+      where
+        p st = runParser p1 st <|> runParser p2 st
 
 ----------------------------------------------------------------------
 -- Exercise 5
